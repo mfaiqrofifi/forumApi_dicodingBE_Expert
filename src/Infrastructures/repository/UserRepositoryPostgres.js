@@ -1,5 +1,4 @@
 const InvariantError = require('../../Commons/exceptions/InvariantError');
-const RegisteredUser = require('../../Domains/users/entities/RegisteredUser');
 const UserRepository = require('../../Domains/users/UserRepository');
 
 class UserRepositoryPostgres extends UserRepository {
@@ -33,7 +32,7 @@ class UserRepositoryPostgres extends UserRepository {
 
     const result = await this._pool.query(query);
 
-    return new RegisteredUser({ ...result.rows[0] });
+    return result.rows[0];
   }
 
   async getPasswordByUsername(username) {
