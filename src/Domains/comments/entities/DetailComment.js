@@ -6,13 +6,15 @@ const DELETED_COMMENT_MESSAGE = '**komentar telah dihapus**';
 class DetailComment {
   constructor(payload) {
     this._verifyPayload(payload);
-    const { id, username, date, content, is_delete, replies } = payload;
+    const { id, username, date, content, is_delete, replies, likeCount } =
+      payload;
 
     this.id = id;
     this.username = username;
     this.date = date;
     this.content = is_delete ? DELETED_COMMENT_MESSAGE : content;
     this.replies = replies.map((reply) => new DetailReply(reply));
+    this.likeCount = likeCount;
   }
 
   _verifyPayload(payload) {
@@ -23,6 +25,7 @@ class DetailComment {
       'content',
       'is_delete',
       'replies',
+      'likeCount',
     ];
     EntityValidator.verifyRequiredProperties(
       payload,
@@ -39,6 +42,7 @@ class DetailComment {
       content: (val) => typeof val === 'string',
       is_delete: (val) => typeof val === 'boolean',
       replies: (val) => Array.isArray(val),
+      likeCount: (val) => typeof val === 'number',
     };
     EntityValidator.verifyDataTypes(payload, typeSpec, 'DETAIL_COMMENT');
   }
