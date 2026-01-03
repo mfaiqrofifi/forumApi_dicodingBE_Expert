@@ -1,0 +1,61 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: ['18.x', '20.x']
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: mysecretpassword
+          POSTGRES_DB: forumapi_test
+        options: >-
+          --health-cmd "pg_isready -U postgres -d forumapi_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: npm install migrate and test
+        run: |
+          npm install
+          npm run migrate:test up
+          npm run test
+        env:
+          CI: true
+          NODE_ENV: test
+
+          # ini yang dipakai pool.js saat test
+          PGHOST_TEST: localhost
+          PGPORT_TEST: 5432
+          PGUSER_TEST: postgres
+          PGPASSWORD_TEST: mysecretpassword
+          PGDATABASE_TEST: forumapi_test
+          PGSSLMODE_TEST: disable
+
+          ACCESS_TOKEN_KEY: secret
+          REFRESH_TOKEN_KEY: terces
+          ACCESS_TOKEN_AGE: 3600
