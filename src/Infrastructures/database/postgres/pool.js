@@ -7,14 +7,16 @@ const testConfig = {
   user: process.env.PGUSER_TEST,
   password: process.env.PGPASSWORD_TEST,
   database: process.env.PGDATABASE_TEST,
-  ssl: { rejectUnauthorized: false },
+  ssl: process.env.PGSSLMODE_TEST === 'require'
+    ? { rejectUnauthorized: false }
+    : false,
 };
 
 const pool =
   process.env.NODE_ENV === 'test'
     ? new Pool(testConfig)
     : new Pool({
-        ssl: process.env.PGHOST
+        ssl: process.env.PGSSLMODE === 'require'
           ? { rejectUnauthorized: false }
           : false,
       });
