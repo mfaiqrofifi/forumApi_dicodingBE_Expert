@@ -18,7 +18,6 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             set -e
-
             cd ~/forumApi_dicodingBE_Expert
 
             git fetch --all
@@ -26,6 +25,8 @@ jobs:
 
             npm install
 
+            export NODE_TLS_REJECT_UNAUTHORIZED=0
+            export PGSSLMODE=require
             npm run migrate up
 
             pm2 restart forum-api || pm2 start npm --name "forum-api" -- start
