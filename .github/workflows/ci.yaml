@@ -2,11 +2,9 @@ name: Continuous Integration
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   test:
@@ -31,6 +29,23 @@ jobs:
         ports:
           - 5432:5432
 
+    env:
+      CI: true
+      NODE_ENV: test
+
+      PGHOST_TEST: localhost
+      PGPORT_TEST: 5432
+      PGUSER_TEST: postgres
+      PGPASSWORD_TEST: mysecretpassword
+      PGDATABASE_TEST: forumapi_test
+      PGSSLMODE_TEST: disable
+
+      ACCESS_TOKEN_KEY: secret
+      REFRESH_TOKEN_KEY: terces
+      ACCESS_TOKEN_AGE: 3600
+
+      DATABASE_URL: postgres://postgres:mysecretpassword@localhost:5432/forumapi_test
+
     steps:
       - uses: actions/checkout@v4
 
@@ -39,23 +54,11 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: npm install migrate and test
-        run: |
-          npm install
-          npm run migrate:test up
-          npm run test
-        env:
-          CI: true
-          NODE_ENV: test
+      - name: Install dependencies
+        run: npm ci
 
-          # ini yang dipakai pool.js saat test
-          PGHOST_TEST: localhost
-          PGPORT_TEST: 5432
-          PGUSER_TEST: postgres
-          PGPASSWORD_TEST: mysecretpassword
-          PGDATABASE_TEST: forumapi_test
-          PGSSLMODE_TEST: disable
+      - name: Migrate test DB
+        run: npx node-pg-migrate up
 
-          ACCESS_TOKEN_KEY: secret
-          REFRESH_TOKEN_KEY: terces
-          ACCESS_TOKEN_AGE: 3600
+      - name: Run tests
+        run: npm test
