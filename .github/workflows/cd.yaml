@@ -24,10 +24,9 @@ jobs:
             git fetch --all
             git reset --hard origin/main
 
-            npm install --omit=dev
+            npm install
 
             npm run migrate up
 
             pm2 restart forum-api || pm2 start npm --name "forum-api" -- start
-
             pm2 save
