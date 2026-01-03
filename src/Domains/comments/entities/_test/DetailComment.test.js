@@ -15,6 +15,7 @@ describe('DetailComment entity', () => {
       content: 4,
       is_delete: 'no',
       replies: {},
+      likeCount: 'invalid',
     };
     expect(() => new DetailComment(payload)).toThrow(
       'DETAIL_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION'
@@ -37,12 +38,14 @@ describe('DetailComment entity', () => {
           is_delete: false,
         },
       ],
+      likeCount: 0,
     };
     const entity = new DetailComment(payload);
     expect(entity).toMatchObject({
       id: 'comment-1',
       username: 'jane',
       content: 'comment',
+      likeCount: 0,
     });
     expect(Array.isArray(entity.replies)).toBe(true);
     expect(entity.replies[0].content).toBe('hello');
@@ -64,9 +67,11 @@ describe('DetailComment entity', () => {
           is_delete: true,
         },
       ],
+      likeCount: 5,
     };
     const entity = new DetailComment(payload);
     expect(entity.content).toBe('**komentar telah dihapus**');
     expect(entity.replies[0].content).toBe('**balasan telah dihapus**');
+    expect(entity.likeCount).toBe(5);
   });
 });

@@ -2,6 +2,7 @@ const pool = require('../../database/postgres/pool');
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
 const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper');
 const CommentsTableTestHelper = require('../../../../tests/CommentsTableTestHelper');
+const CommentLikesTableTestHelper = require('../../../../tests/CommentLikesTableTestHelper');
 const container = require('../../container');
 const createServer = require('../createServer');
 
@@ -11,6 +12,7 @@ describe('/threads/{threadId}/comments endpoint', () => {
   });
 
   afterEach(async () => {
+    await CommentLikesTableTestHelper.cleanTable();
     await CommentsTableTestHelper.cleanTable();
     await ThreadsTableTestHelper.cleanTable();
     await UsersTableTestHelper.cleanTable();
@@ -111,7 +113,7 @@ describe('/threads/{threadId}/comments endpoint', () => {
       expect(response.statusCode).toEqual(400);
       expect(responseJson.status).toEqual('fail');
       expect(responseJson.message).toEqual(
-        'tidak dapat menambahkan komentar karena properti yang dibutuhkan tidak ada',
+        'tidak dapat menambahkan komentar karena properti yang dibutuhkan tidak ada'
       );
     });
 
@@ -160,14 +162,17 @@ describe('/threads/{threadId}/comments endpoint', () => {
       expect(response.statusCode).toEqual(400);
       expect(responseJson.status).toEqual('fail');
       expect(responseJson.message).toEqual(
-        'tidak dapat menambahkan komentar karena tipe data tidak sesuai',
+        'tidak dapat menambahkan komentar karena tipe data tidak sesuai'
       );
     });
 
     it('should response 401 when no access token is provided', async () => {
       const server = await createServer(container);
 
-      await UsersTableTestHelper.addUser({ id: 'user-123', username: 'dicoding' });
+      await UsersTableTestHelper.addUser({
+        id: 'user-123',
+        username: 'dicoding',
+      });
       await ThreadsTableTestHelper.addThread({
         id: 'thread-123',
         title: 'sebuah thread',
@@ -226,7 +231,8 @@ describe('/threads/{threadId}/comments endpoint', () => {
         payload: { content: 'sebuah comment' },
         headers: { Authorization: `Bearer ${accessToken}` },
       });
-      const commentId = JSON.parse(commentResponse.payload).data.addedComment.id;
+      const commentId = JSON.parse(commentResponse.payload).data.addedComment
+        .id;
 
       const response = await server.inject({
         method: 'DELETE',
@@ -242,7 +248,10 @@ describe('/threads/{threadId}/comments endpoint', () => {
     it('should response 401 when no access token is provided', async () => {
       const server = await createServer(container);
 
-      await UsersTableTestHelper.addUser({ id: 'user-123', username: 'dicoding' });
+      await UsersTableTestHelper.addUser({
+        id: 'user-123',
+        username: 'dicoding',
+      });
       await ThreadsTableTestHelper.addThread({
         id: 'thread-123',
         title: 'sebuah thread',
@@ -314,7 +323,8 @@ describe('/threads/{threadId}/comments endpoint', () => {
         payload: { content: 'sebuah comment' },
         headers: { Authorization: `Bearer ${accessTokenUser1}` },
       });
-      const commentId = JSON.parse(commentResponse.payload).data.addedComment.id;
+      const commentId = JSON.parse(commentResponse.payload).data.addedComment
+        .id;
 
       const loginUser2 = await server.inject({
         method: 'POST',
@@ -335,7 +345,9 @@ describe('/threads/{threadId}/comments endpoint', () => {
       const responseJson = JSON.parse(response.payload);
       expect(response.statusCode).toEqual(403);
       expect(responseJson.status).toEqual('fail');
-      expect(responseJson.message).toEqual('anda tidak berhak mengakses resource ini');
+      expect(responseJson.message).toEqual(
+        'anda tidak berhak mengakses resource ini'
+      );
     });
 
     it('should response 404 when comment not found', async () => {

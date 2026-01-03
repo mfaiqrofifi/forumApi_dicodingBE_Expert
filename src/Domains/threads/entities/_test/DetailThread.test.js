@@ -44,6 +44,7 @@ describe('DetailThread entity', () => {
               is_delete: false,
             },
           ],
+          likeCount: 2,
         },
       ],
     };
@@ -55,5 +56,6 @@ describe('DetailThread entity', () => {
     });
     expect(Array.isArray(entity.comments)).toBe(true);
     expect(entity.comments[0].replies[0].content).toBe('hello');
+    expect(entity.comments[0].likeCount).toBe(2);
   });
 });

@@ -2,6 +2,7 @@ const GetThreadDetailsUseCase = require('../GetThreadDetailsUseCase');
 const ThreadRepository = require('../../../Domains/threads/ThreadRepository');
 const CommentRepository = require('../../../Domains/comments/CommentRepository');
 const ReplyRepository = require('../../../Domains/replies/ReplyRepository');
+const LikeRepository = require('../../../Domains/likes/LikeRepository');
 
 describe('GetThreadDetailsUseCase', () => {
   it('should orchestrate get thread detail action correctly', async () => {
@@ -52,6 +53,7 @@ describe('GetThreadDetailsUseCase', () => {
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
     const mockReplyRepository = new ReplyRepository();
+    const mockLikeRepository = new LikeRepository();
 
     mockThreadRepository.getThreadById = jest
       .fn()
@@ -63,11 +65,16 @@ describe('GetThreadDetailsUseCase', () => {
       .fn()
       .mockResolvedValueOnce(mockReplies)
       .mockResolvedValueOnce([]);
+    mockLikeRepository.getLikeCountByCommentId = jest
+      .fn()
+      .mockResolvedValueOnce(2)
+      .mockResolvedValueOnce(1);
 
     const getThreadDetailsUseCase = new GetThreadDetailsUseCase({
       threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
       replyRepository: mockReplyRepository,
+      likeRepository: mockLikeRepository,
     });
 
     // Action
@@ -88,12 +95,14 @@ describe('GetThreadDetailsUseCase', () => {
 
     expect(result.comments).toHaveLength(2);
     expect(result.comments[0].content).toEqual('sebuah comment');
+    expect(result.comments[0].likeCount).toEqual(2);
     expect(result.comments[0].replies).toHaveLength(2);
     expect(result.comments[0].replies[0].content).toEqual('sebuah balasan');
     expect(result.comments[0].replies[1].content).toEqual(
       '**balasan telah dihapus**'
     );
     expect(result.comments[1].content).toEqual('**komentar telah dihapus**');
+    expect(result.comments[1].likeCount).toEqual(1);
     expect(result.comments[1].replies).toHaveLength(0);
   });
 
@@ -103,6 +112,7 @@ describe('GetThreadDetailsUseCase', () => {
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
     const mockReplyRepository = new ReplyRepository();
+    const mockLikeRepository = new LikeRepository();
 
     const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
     const notFoundError = new NotFoundError('thread tidak ditemukan');
@@ -115,6 +125,7 @@ describe('GetThreadDetailsUseCase', () => {
       threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
       replyRepository: mockReplyRepository,
+      likeRepository: mockLikeRepository,
     });
 
     // Action & Assert
@@ -137,6 +148,7 @@ describe('GetThreadDetailsUseCase', () => {
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
     const mockReplyRepository = new ReplyRepository();
+    const mockLikeRepository = new LikeRepository();
 
     mockThreadRepository.getThreadById = jest
       .fn()
@@ -149,6 +161,7 @@ describe('GetThreadDetailsUseCase', () => {
       threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
       replyRepository: mockReplyRepository,
+      likeRepository: mockLikeRepository,
     });
 
     // Action
@@ -193,6 +206,7 @@ describe('GetThreadDetailsUseCase', () => {
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
     const mockReplyRepository = new ReplyRepository();
+    const mockLikeRepository = new LikeRepository();
 
     mockThreadRepository.getThreadById = jest
       .fn()
@@ -203,11 +217,13 @@ describe('GetThreadDetailsUseCase', () => {
     mockReplyRepository.getRepliesByCommentId = jest
       .fn()
       .mockResolvedValue(mockReplies);
+    mockLikeRepository.getLikeCountByCommentId = jest.fn().mockResolvedValue(3);
 
     const getThreadDetailsUseCase = new GetThreadDetailsUseCase({
       threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
       replyRepository: mockReplyRepository,
+      likeRepository: mockLikeRepository,
     });
 
     // Action
@@ -218,5 +234,6 @@ describe('GetThreadDetailsUseCase', () => {
     expect(result.comments[0].replies[0].id).toEqual('reply-1');
     expect(result.comments[0].replies[0].username).toEqual('johndoe');
     expect(result.comments[0].replies[0].content).toEqual('sebuah balasan');
+    expect(result.comments[0].likeCount).toEqual(3);
   });
 });
